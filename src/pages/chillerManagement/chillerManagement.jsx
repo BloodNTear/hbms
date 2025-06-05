@@ -22,19 +22,53 @@ function ChillerManagement(){
     //#region Get API Info 
     const [globalState, setGlobalState] = useState(() => {
         const initialState = {
-            autoControl: {
-                volumePressure: 0,
-                minInputWaterTemp: 0,
-                currentWaterTemp: 0
+            display : {
+                inputTemp: 0,
+                roomTemp: 0,
+
+                inputHumid: 0,
+                roomHumid: 0,
+
+                pressure: 0,
+                heatingCoilTemp: 0,
+
+                fanFreq: 0,
+                co2: 0,
+
+                waterTemp: 0
             },
-            manualControl: {
-                valvePercentage: 0,
-                pump: false,
-                pumpState: false,
-                comp: false,
-                frequency: 0,
+            upload: {
+                fanState: false,
+                heatingCoilState: false,
+                inputValveState: false,
+                outputValveState: false,
+
+                valveOpen: 0,
+
+
+                fanControl: true,
+                inputValveControl: true,
+                outputValveControl: true,
+                heatingCoilControl: true,
+                emergencyControl: true,
+
+                fanFreqInput: 0,
+                valveOpenControl: 0,
+                setAutoTemp: 0,
+                setAutoHumid: 0,
+                setAutoPressure: 0
             },
-            pointerData: []
+            hiddenUpload:{
+                fanAutoOffTemp: 0,
+                minByPass: 0,
+                maxByPass: 0,
+                maxHeatingCoilPercentage: 0
+            },
+            calUpload: {
+                minAO4: 0,
+                maxAO4: 0
+            },
+            controlMode: 0
         };
 
         return initialState;
@@ -128,26 +162,6 @@ function ChillerManagement(){
             );
         }
     };
-
-    function TurnOff(){
-        setGlobalState((prev) => ({
-            ...prev,
-            manualControl: {
-                ...prev.manualControl,
-                pump: false,
-                pumpState: false,
-                comp: false,
-            }
-        }));
-
-        setControlMode("off");
-    };
-    function TurnManual(){
-        setControlMode("manual")
-    };
-    function TurnAuto(){
-        setControlMode("auto");
-    }
     //#endregion
 
     //#region Handle Child Submit
@@ -187,28 +201,8 @@ function ChillerManagement(){
     useEffect(() => {
 
         function SilentSetNewGlobalState(responseData){
-
-            const valveOpen = GetPropValue(responseData, POINT_ID["Độ mở van"], "point_value");
-            const pumpOn = GetPropValue(responseData, POINT_ID["On Off Pump"], "point_value");
-            const pumpStart = GetPropValue(responseData, POINT_ID["Start Stop Pump"], "point_value");
-            const compOn = GetPropValue(responseData, POINT_ID["On Off Comp"], "point_value");
-            const pumpFreq = GetPropValue(responseData, POINT_ID["Tần số bơm"], "point_value");
-            const waterTemp = GetPropValue(responseData, POINT_ID["Nhiệt độ nước cấp"], "point_value");
-
             setGlobalState((prev) => ({
-                ...prev,
-                autoControl: {
-                    ...prev.autoControl,
-                    currentWaterTemp: waterTemp
-                },
-                manualControl: {
-                    valvePercentage: Number(valveOpen) || 0,
-                    pump: Number(pumpOn) === 1,
-                    pumpState: Number(pumpStart) === 1,
-                    comp: Number(compOn) === 1,
-                    frequency: Number(pumpFreq) || 0,
-                },
-                pointerData: responseData
+               
             }));
         };
 
@@ -242,129 +236,6 @@ function ChillerManagement(){
         return () => clearInterval(interval);
         
     }, [silentAxiosInstance]);
-
-    //Auto Turn On/Off Compress in Auto Mode
-    useEffect(() => {
-        if(controlMode === "auto"){
-            async function PressCompButton(field, value) {
-                const API_ENDPOINT = "points/save";
-                const api_model = {
-                    slug: "onoff-may-nen",
-                    excerpt: "4|HR|348|0|W",
-                    description: "Override Value DO 01",
-                    thumbnail: "",
-                    point_value: value ? 1 : 0,
-                    calib: "0",
-                    point_value_type: "0",
-                    default_value: "0",
-                    access_type: "write",
-                    updated_date: "2025-05-29T10:29:07.737Z",
-                    status: "active",
-                    is_featured: 1,
-                    created_date: 946686541377,
-                    device_id: "67377d59a814500731ce2da4",
-                    unit_id: "670e351354eba1071f4d2b53",
-                    schedule_id: null,
-                    title: "on/off may nen",
-                    company_id: "5cf4eb1557a81c267803c398",
-                    author_id: "5cf5013557a81c267803c3a3",
-                    id: "386d4a4d31c5dd071c6fe259"
-                };
-
-                    try {
-                        const response = await axiosInstance.post(API_ENDPOINT, api_model);
-                        if(response?.data?.status){
-                            callReload && callReload();
-                        }else{
-                            console.error("Set Pump Start Stop: " + response?.data?.MESSAGE);
-                        }
-                    } catch (error) {
-                        console.error(error)
-                    }
-            }
-
-            function GetValue(id){
-                const targetUnit = globalState?.pointerData?.find(unit => unit?.id === id);
-                if(targetUnit){
-                    return targetUnit?.point_value;
-                }else{
-                    return "Unit not found <!>";
-                }
-            };
-
-            if(GetValue(POINT_ID["Nhiệt độ nước cấp"]) > globalState?.autoControl?.minInputWaterTemp  && !globalState.manualControl.comp){
-                PressCompButton("comp", true);
-            }
-
-            if(GetValue(POINT_ID["Nhiệt độ nước cấp"]) < globalState?.autoControl?.minInputWaterTemp  && globalState.manualControl.comp){
-                PressCompButton("comp", false);
-            }
-        }
-    },[globalState.autoControl.minInputWaterTemp, globalState.autoControl.currentWaterTemp]);
-    
-    //Auto Adjust Valve open percentage in Auto Mode 
-    useEffect(() => {
-
-        if(controlMode === "auto"){
-            function GetValue(id){
-                const targetUnit = globalState?.pointerData?.find(unit => unit?.id === id);
-                if(targetUnit){
-                    return targetUnit?.point_value;
-                }else{
-                    return "Unit not found <!>";
-                }
-            };
-
-            function GetPressureDiff(){
-                return GetValue(POINT_ID["Áp suất nước cấp"]) - GetValue(POINT_ID["Áp suất nước hồi"]);
-            };
-
-            const deltaP = GetPressureDiff() - globalState?.autoControl?.volumePressure;
-            const valveLevel = (deltaP / 0.5) * 100;
-            let actualApiValue = valveLevel > 0 ? valveLevel : 0;
-            actualApiValue = actualApiValue <= 100 ? actualApiValue : 100;
-
-            async function CallSaveValveValue(field, value) {
-                const API_ENDPOINT = "points/save";
-                const api_model = {
-                    slug: "van-can-bang_w",
-                    excerpt: "4|HR|612|0|W",
-                    description: "",
-                    thumbnail: "",
-                    point_value: value,
-                    calib: "0",
-                    point_value_type: "VALUE",
-                    default_value: "0",
-                    access_type: "write",
-                    updated_date: "2025-06-01T03:39:59.220Z",
-                    status: "active",
-                    is_featured: 1,
-                    created_date: 946687484581,
-                    device_id: "67377d59a814500731ce2da4",
-                    unit_id: "386d484531c5dd071c6fe254",
-                    schedule_id: null,
-                    title: "van can bang_W",
-                    company_id: "5cf4eb1557a81c267803c398",
-                    author_id: "5cf5013557a81c267803c3a3",
-                    id: "386d4dfca30e03071cec3db3"
-                };
-
-                try {
-                    const response = await axiosInstance.post(API_ENDPOINT, api_model);
-                    if(response?.data?.status){
-                        callReload && callReload();
-                    }else{
-                        console.error("Auto Set Valve Open: " + response?.data?.MESSAGE);
-                    }
-                } catch (error) {
-                    console.error(error)
-                }
-            }
-
-            CallSaveValveValue("valveOpenPercentage", actualApiValue);
-        }
-
-    },[globalState.autoControl.volumePressure]);
     //#endregion
 
     return(
@@ -389,7 +260,10 @@ function ChillerManagement(){
                 </div>
                 <div className="control-display">
                     <div className="statistic-display">
-
+                        <SystemStatus 
+                            currentState={globalState}
+                            currentMode={controlMode}
+                        />
                     </div>
 
                     <div className="control">

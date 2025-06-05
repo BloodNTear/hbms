@@ -46,7 +46,7 @@
     height: 60%;
     width: 100%;
 
-    background: #d7edfa;
+    background: #b2dff6;
     border: 2px solid rgba(255,255,255, .2);    
     backdrop-filter: blur(30px);
     border-radius: 10px;
@@ -58,9 +58,27 @@
     height: 40%;
     width: 100%;
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.chiller-management-wrapper .page-body .control-display .control,
+.chiller-management-wrapper .page-body .control-display .statistic-display
+{
     background: transparent;
     border: 2px solid rgba(255,255,255, .2);    
     backdrop-filter: blur(30px);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255,255,255, .2);
+}
+
+.chiller-management-wrapper .page-body .control-display .statistic-display{
+    height: 100%;
+    width: 60%;
+}
+.chiller-management-wrapper .page-body .control-display .control{
+    height: 100%;
+    width: 40%;
 }
