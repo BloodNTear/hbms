@@ -2,7 +2,7 @@ import './VisualGraph.css';
 
 import { useRef, useEffect, useState } from 'react';
 
-import SYSTEMGRAPH from '../../../assets/system-graph.png';
+import SYSTEMGRAPH from '../../../assets/system-graph.jpg';
 import { MovingLine } from './MovingLine';
 
 function VisualGraph({ currentState }) {
