@@ -6,7 +6,7 @@ import { useLoading } from '../utilities/loadingContext';
 
 const axiosInstance = axios.create({
     baseURL: '/api',
-    timeout: 5
+    timeout: 20000
 });
 
 export const useAxiosWithAuth = () => {
