@@ -13,7 +13,7 @@
     gap: 20px;
 
     background: transparent;
-    border: 2px solid rgba(255,255,255, .2);    
+    border: 2px solid rgba(0,0,0, 1);    
     backdrop-filter: blur(30px);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255,255,255, .2);
@@ -47,7 +47,7 @@
     width: 100%;
 
     background: #b2dff6;
-    border: 2px solid rgba(255,255,255, .2);    
+    border: 2px solid rgba(0,0,0, 1);    
     backdrop-filter: blur(30px);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255,255,255, .2);
@@ -68,7 +68,7 @@
 .chiller-management-wrapper .page-body .control-display .statistic-display
 {
     background: transparent;
-    border: 2px solid rgba(255,255,255, .2);    
+    border: 2px solid rgba(0,0,0, 1);    
     backdrop-filter: blur(30px);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255,255,255, .2);
