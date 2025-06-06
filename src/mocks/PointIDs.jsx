@@ -38,13 +38,145 @@ export const POINT_ID = {
     "Max Output AO4 (Fan)": "386d5fe717e636070f9394fe", //Ghi xuống giá trị tần số Max của quạt (khi chạy auto)
 };
 
-export const PressureValue = {
+export const PressureAO4Value = {
     45: {
-        min: 64,
-        max: 100
+        min: 63,
+        max: 95
     },
     46: {
+        min: 63,
+        max: 95
+    },
+    47: {
+        min: 63,
+        max: 95
+    },
+    48: {
         min: 64,
+        max: 95
+    },
+    49: {
+        min: 64,
+        max: 95
+    },
+    50: {
+        min: 66,
+        max: 95
+    },
+    51: {
+        min: 66,
+        max: 95
+    },
+    52: {
+        min: 68,
+        max: 95
+    },
+    53: {
+        min: 68,
+        max: 95
+    },
+    54: {
+        min: 68,
+        max: 95
+    },
+    55: {
+        min: 72,
+        max: 95
+    },
+    56: {
+        min: 72,
+        max: 95
+    },
+    57: {
+        min: 72,
+        max: 95
+    },
+    58: {
+        min: 72,
+        max: 95
+    },
+    59: {
+        min: 74,
+        max: 95
+    },
+    60: {
+        min: 74,
+        max: 95
+    },
+    61: {
+        min: 74,
+        max: 95
+    },
+    62: {
+        min: 74,
+        max: 95
+    },
+    63: {
+        min: 76,
+        max: 95
+    },
+    64: {
+        min: 76,
+        max: 95
+    },
+    65: {
+        min: 76,
+        max: 95
+    },
+    66: {
+        min: 78,
         max: 100
-    }
+    },
+    67: {
+        min: 78,
+        max: 100
+    },
+    68: {
+        min: 78,
+        max: 100
+    },
+    69: {
+        min: 78,
+        max: 100
+    },
+    70: {
+        min: 80,
+        max: 100
+    },
+    71: {
+        min: 80,
+        max: 100
+    },
+    72: {
+        min: 80,
+        max: 100
+    },
+    73: {
+        min: 80,
+        max: 100
+    },
+    74: {
+        min: 80,
+        max: 100
+    },
+    76: {
+        min: 82,
+        max: 100
+    },
+    77: {
+        min: 82,
+        max: 100
+    },
+    78: {
+        min: 82,
+        max: 100
+    },
+    79: {
+        min: 82,
+        max: 100
+    },
+    80: {
+        min: 82,
+        max: 100
+    },
 }

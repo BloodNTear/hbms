@@ -7,8 +7,7 @@ import { useSilentAxiosWithAuth } from '../../api/useSilentAxiosWithAuth';
 
 import { SystemStatus } from './systemStatus';
 import { VisualGraph } from './VisualGraph';
-import { AutoControl } from './AutoControl';
-import { ManualControl } from './ManualControl';
+import { Control } from './control';
 
 import { POINT_ID } from '../../mocks/PointIDs';
 
@@ -81,27 +80,54 @@ function ChillerManagement(){
 
     useEffect(() => {
         function SetNewGlobalState(responseData){
-            const valveOpen = GetPropValue(responseData, POINT_ID["Độ mở van"], "point_value");
-            const pumpOn = GetPropValue(responseData, POINT_ID["On Off Pump"], "point_value");
-            const pumpStart = GetPropValue(responseData, POINT_ID["Start Stop Pump"], "point_value");
-            const compOn = GetPropValue(responseData, POINT_ID["On Off Comp"], "point_value");
-            const pumpFreq = GetPropValue(responseData, POINT_ID["Tần số bơm"], "point_value");
-            const waterTemp = GetPropValue(responseData, POINT_ID["Nhiệt độ nước cấp"], "point_value");
 
+            //#region Display
+            const inputTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ đầu vào"], "point_value");
+            const roomTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ đầu ra"], "point_value");
+            const inputHumidValue = GetPropValue(responseData, POINT_ID["Độ ẩm đầu vào"], "point_value");
+            const roomHumidValue = GetPropValue(responseData, POINT_ID["Độ ẩm đầu ra"], "point_value");
+            const pressureValue = GetPropValue(responseData, POINT_ID["Áp suất gió"], "point_value");
+            const heatingCoilTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ PT100"], "point_value");
+            const fanFreqValue = GetPropValue(responseData, POINT_ID["Đọc tần số động cơ"], "point_value");
+            const co2Value = GetPropValue(responseData, POINT_ID["Nồng độ CO2"], "point_value");
+            const waterTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ nước"], "point_value");
+            //#endregion
+            //#region Upload
+            const fanStateValue = GetPropValue(responseData, POINT_ID["Read Value of DO5"], "point_value");
+            const heatingCoilStateValue = GetPropValue(responseData, POINT_ID["Trạng thái heating coil"], "point_value");
+            const inputValveStateValue = GetPropValue(responseData, POINT_ID["Trạng thái valve 1"], "point_value");
+            const outputValveStateValue = GetPropValue(responseData, POINT_ID["Trạng thái valve 2"], "point_value");
+            const valveOpenValue = GetPropValue(responseData, POINT_ID["đọc về % mở valve"], "point_value");
+            //#endregion
+            const controlModeValue = GetPropValue(responseData, POINT_ID["mode chuyển chế độ"], "point_value");
+            
             setGlobalState((prev) => ({
                 ...prev,
-                autoControl: {
-                    ...prev.autoControl,
-                    currentWaterTemp: waterTemp
+                display : {
+                    inputTemp: inputTempValue || -1,
+                    roomTemp: roomTempValue || -1,
+
+                    inputHumid: inputHumidValue || -1,
+                    roomHumid: roomHumidValue || -1,
+
+                    pressure: pressureValue || -1,
+                    heatingCoilTemp: heatingCoilTempValue || -1,
+
+                    fanFreq: fanFreqValue || -1,
+                    co2: co2Value || -1,
+
+                    waterTemp: waterTempValue || -1
                 },
-                manualControl: {
-                    valvePercentage: Number(valveOpen) || 0,
-                    pump: Number(pumpOn) === 1,
-                    pumpState: Number(pumpStart) === 1,
-                    comp: Number(compOn) === 1,
-                    frequency: Number(pumpFreq) || 0,
+                upload: {
+                    ...prev.upload,
+                    fanState: fanStateValue,
+                    heatingCoilState: heatingCoilStateValue,
+                    inputValveState: inputValveStateValue,
+                    outputValveState: outputValveStateValue,
+
+                    valveOpen: valveOpenValue || -1,
                 },
-                pointerData: responseData
+                controlMode: controlModeValue || -1
             }));
         };
 
@@ -134,75 +160,68 @@ function ChillerManagement(){
     //#endregion
 
     //#region Control Mode
-    //True for auto, false for manual
-    const [controlMode, setControlMode] = useState("off");
-
-    function GetControlElement(){
-        switch(controlMode){
-            case "auto": return (
-                <AutoControl 
-                    currentAutoData={globalState.autoControl}
-                    currentManualData={globalState.manualControl}
-                    onDataSubmit={handleAutoDataSubmit}
-                    triggerReload={callReload}
-                />
-            );
-
-            case "manual": return (
-                <ManualControl
-                    currentManualData={globalState.manualControl} 
-                    triggerReload={callReload}
-                />
-            );
-
-            default: return (
-                <div className="control-wrapper">
-                    <h2>Please Turn On First</h2>
-                </div>
-            );
-        }
-    };
-    //#endregion
-
-    //#region Handle Child Submit
-    function handleManualStateChange(manualStateData){
+    function handleModeSwitch(value){
         setGlobalState((prev) => ({
             ...prev,
-            manualControl: manualStateData
+            controlMode: value
         }));
     }
-
-    function handleAutoStateChange(autoStateData){
-        setGlobalState((prev) => ({
-            ...prev,
-            autoControl: autoStateData
-        }));
-    }
-    //#endregion
-
-    //#region Handle Auto Data Submit
-
-    function handleAutoDataSubmit(field, value){
-        setGlobalState((prev) => ({
-            ...prev,
-            autoControl: {
-                ...prev.autoControl,
-                [field]: value
-            }
-        }));
-    }
-
     //#endregion
 
     //#region Silent reload and Auto Control
-    const refreshRate = 30;
-    
+    const [refreshRate, setRefreshRate] = useState(() => {return 5});
     //Auto refresh data at refreshRate
     useEffect(() => {
 
-        function SilentSetNewGlobalState(responseData){
+         function SlientlySetNewGlobalState(responseData){
+
+            //#region Display
+            const inputTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ đầu vào"], "point_value");
+            const roomTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ đầu ra"], "point_value");
+            const inputHumidValue = GetPropValue(responseData, POINT_ID["Độ ẩm đầu vào"], "point_value");
+            const roomHumidValue = GetPropValue(responseData, POINT_ID["Độ ẩm đầu ra"], "point_value");
+            const pressureValue = GetPropValue(responseData, POINT_ID["Áp suất gió"], "point_value");
+            const heatingCoilTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ PT100"], "point_value");
+            const fanFreqValue = GetPropValue(responseData, POINT_ID["Đọc tần số động cơ"], "point_value");
+            const co2Value = GetPropValue(responseData, POINT_ID["Nồng độ CO2"], "point_value");
+            const waterTempValue = GetPropValue(responseData, POINT_ID["Nhiệt độ nước"], "point_value");
+            //#endregion
+            //#region Upload
+            const fanStateValue = GetPropValue(responseData, POINT_ID["Read Value of DO5"], "point_value");
+            const heatingCoilStateValue = GetPropValue(responseData, POINT_ID["Trạng thái heating coil"], "point_value");
+            const inputValveStateValue = GetPropValue(responseData, POINT_ID["Trạng thái valve 1"], "point_value");
+            const outputValveStateValue = GetPropValue(responseData, POINT_ID["Trạng thái valve 2"], "point_value");
+            const valveOpenValue = GetPropValue(responseData, POINT_ID["đọc về % mở valve"], "point_value");
+            //#endregion
+            const controlModeValue = GetPropValue(responseData, POINT_ID["mode chuyển chế độ"], "point_value");
+            
             setGlobalState((prev) => ({
-               
+                ...prev,
+                display : {
+                    inputTemp: inputTempValue || -1,
+                    roomTemp: roomTempValue || -1,
+
+                    inputHumid: inputHumidValue || -1,
+                    roomHumid: roomHumidValue || -1,
+
+                    pressure: pressureValue || -1,
+                    heatingCoilTemp: heatingCoilTempValue || -1,
+
+                    fanFreq: fanFreqValue || -1,
+                    co2: co2Value || -1,
+
+                    waterTemp: waterTempValue || -1
+                },
+                upload: {
+                    ...prev.upload,
+                    fanState: fanStateValue,
+                    heatingCoilState: heatingCoilStateValue,
+                    inputValveState: inputValveStateValue,
+                    outputValveState: outputValveStateValue,
+
+                    valveOpen: valveOpenValue || -1,
+                },
+                controlMode: controlModeValue || -1
             }));
         };
 
@@ -220,7 +239,7 @@ function ChillerManagement(){
             try{
                 const response  = await silentAxiosInstance.get(GET_URL);
                 if(response?.data){
-                    SilentSetNewGlobalState(response?.data?.data);
+                    SlientlySetNewGlobalState(response?.data?.data);
                 }else{
                     console.error("Error <!>");
                 }
@@ -235,9 +254,31 @@ function ChillerManagement(){
         }, refreshRate * 1000);
         return () => clearInterval(interval);
         
-    }, [silentAxiosInstance]);
+    }, [silentAxiosInstance, refreshRate]);
     //#endregion
 
+    //#region Control Submission
+    function handleSwitchButton(field, value){
+        setGlobalState((prev) => ({
+            ...prev,
+            upload:{
+                ...prev.upload,
+                [field]: value
+            }
+        }));
+    }
+
+    function handleValueSubmit(field, value){
+        setGlobalState((prev) => ({
+            ...prev,
+            upload:{
+                ...prev.upload,
+                [field]: value
+            }
+        }));
+    }
+
+    //#endregion
     return(
         <div className="chiller-management-wrapper">
             <div className="page-header">
@@ -253,21 +294,23 @@ function ChillerManagement(){
             <div className="page-body">
                 <div className="visual-graph">
                     <VisualGraph 
-                        pumpState={true}
-                        valveState={true}
-                        compState={true}
+                        currentState={globalState}
                     />
                 </div>
                 <div className="control-display">
                     <div className="statistic-display">
                         <SystemStatus 
                             currentState={globalState}
-                            currentMode={controlMode}
                         />
                     </div>
 
                     <div className="control">
-
+                        <Control 
+                            currentState={globalState}
+                            onModeSwitch={handleModeSwitch}
+                            onButtonPress={handleSwitchButton}
+                            onValueSubmit={handleValueSubmit}
+                        />
                     </div>
                 </div>
             </div>

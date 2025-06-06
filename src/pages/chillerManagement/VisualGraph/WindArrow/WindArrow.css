@@ -1,8 +1,0 @@
-@keyframes wind-arrow-flow {
-  0% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -10;
-  }
-}

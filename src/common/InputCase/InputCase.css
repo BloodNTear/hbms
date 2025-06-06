@@ -9,4 +9,14 @@
     align-items: center;
 
     gap: 10px;
+
+    background: transparent;
+    border: 2px solid rgba(255,255,255, .2);    
+    backdrop-filter: blur(30px);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255,255,255, .2);
+}
+
+.transparent-input{
+    background-color: transparent;
 }

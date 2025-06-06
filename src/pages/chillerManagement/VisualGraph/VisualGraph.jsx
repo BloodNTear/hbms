@@ -3,10 +3,9 @@ import './VisualGraph.css';
 import { useRef, useEffect, useState } from 'react';
 
 import SYSTEMGRAPH from '../../../assets/system-graph.png';
-import WaterPipe from './WaterPipe/WaterPipe';
-import WindArrow from './WindArrow/WindArrow';
+import { MovingLine } from './MovingLine';
 
-function VisualGraph({ pumpState, valveState, compState }) {
+function VisualGraph({ currentState }) {
   const svgRef = useRef(null);
 
   function handleSvgClick(event) {
@@ -22,15 +21,15 @@ function VisualGraph({ pumpState, valveState, compState }) {
     alert(`x: ${svgP.x.toFixed(2)}, y: ${svgP.y.toFixed(2)}`);
   };
 
-  function GetValveSpeed(){
-     if(valveState > 0 && valveState < 10){
-        return 1;
-     }else if(valveState < 20){
-        return 2;
-     }else{
-        return 3;
-     }
-  };
+  // function GetValveSpeed(){
+  //    if(valveState > 0 && valveState < 10){
+  //       return 1;
+  //    }else if(valveState < 20){
+  //       return 2;
+  //    }else{
+  //       return 3;
+  //    }
+  // };
 
   const imgRef = useRef(null);
   const [size, setSize] = useState({ width: 1000, height: 750 });
@@ -64,6 +63,13 @@ function VisualGraph({ pumpState, valveState, compState }) {
         style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'auto', cursor: 'crosshair' }}
         onClick={handleSvgClick}
       >
+        <MovingLine 
+            flowState={true}
+            flowDirection={true}
+            speed={3}
+            startPoint={[100, 200]}
+            endPoint={[300, 400]}
+        />
 
       </svg>
     </div>

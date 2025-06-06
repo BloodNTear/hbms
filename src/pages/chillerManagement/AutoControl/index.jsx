@@ -1,1 +1,0 @@
-export {default as AutoControl} from './AutoControl.jsx';

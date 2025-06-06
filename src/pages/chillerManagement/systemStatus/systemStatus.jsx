@@ -4,52 +4,66 @@ import { useState, useEffect } from 'react';
 
 import { InfoDisplayCase } from './InfoDisplayCase';
 
-import { POINT_ID } from '../../../mocks/PointIDs';
+import CO2 from '../../../assets/co2.png';
+import FREQUENCY from '../../../assets/frequency.png';
+import HEATINGCOIL from '../../../assets/heatingcoil.png';
+import HUMIDITY from '../../../assets/humidity.png';
+import PRESSURE from '../../../assets/pressure.png';
+import TEMP from '../../../assets/temp.png';
 
-function SystemStatus({currentState, currentMode, onOff, onManual, onAuto}){
+function SystemStatus({currentState}){
 
-    const [systemData, setSystemData] = useState(() => {
-        return currentState;
-    });
-
-    useEffect(() => {
-        setSystemData(currentState);
-    },[currentState]);
-
-    //#region Parent-passed functions
-    function handleTurnOff(){
-        onOff && onOff();
-    }
-    function handleTurnManual(){
-        onManual && onManual();
-    }
-    function handleTurnAuto(){
-        if(currentState.manualControl.pump &&
-             currentState.manualControl.comp &&
-              currentState.manualControl.pumpState){
-            onAuto && onAuto();
-        }else{
-            alert("PUMP and COMP in Manual Control MUST be ON to use Auto <!>");
-        }
-    }
-    //#endregion
-
-    //#region UI Helper Functions
-    function GetValue(id){
-        const targetUnit = systemData?.pointerData?.find(unit => unit?.id === id);
-        if(targetUnit){
-            return targetUnit?.point_value;
-        }else{
-            return "Unit not found <!>";
-        }
-    };
-    //#endregion
-
+    //#region Distribute Info
     const tempInfor = [
         {
-            title: "Nhiet do dau vao"
+            title: "Nhiệt độ đầu vào",
+            value: `${currentState.display.inputTemp} °C`
+        },
+        {
+            title: "Nhiệt độ phòng",
+            value: `${currentState.display.roomTemp} °C`
         }
     ];
+
+    const humidInfo = [
+        {
+            title: "Độ ẩm đầu vào",
+            value: `${currentState.display.inputHumid} %`
+        },
+        {
+            title: "Độ ẩm phòng",
+            value: `${currentState.display.inputHumid} %`
+        }
+    ];
+
+    const pressureInfo = [
+        {
+            title: "Áp suất gió",
+            value: `${currentState.display.pressure} Pa`
+        }
+    ];
+
+    const heatingCoilInfo = [
+        {
+            title: "Nhiệt độ trở nhiệt",
+            value: `${currentState.display.heatingCoilTemp} °C`
+        }
+    ];
+
+    const fanFreqInfo = [
+        {
+            title: "Tần số quạt",
+            value: `${currentState.display.fanFreq} Hz`
+        }
+    ];
+
+    const co2Info = [
+        {
+            title: "Nồng độ CO2",
+            value: `${currentState.display.co2} ppm`
+        }
+    ];
+    //#endregion
 
     return(
         <div className="system-status-wrapper">
@@ -57,6 +71,36 @@ function SystemStatus({currentState, currentMode, onOff, onManual, onAuto}){
                 <h2>Giám sát</h2>
             </div>
             <div className="info-display">
+                <InfoDisplayCase 
+                    key={1}
+                    icon={TEMP}
+                    info={tempInfor}
+                />
+                <InfoDisplayCase 
+                    key={2}
+                    icon={HUMIDITY}
+                    info={humidInfo}
+                />
+                <InfoDisplayCase 
+                    key={3}
+                    icon={PRESSURE}
+                    info={pressureInfo}
+                />
+                <InfoDisplayCase 
+                    key={4}
+                    icon={FREQUENCY}
+                    info={fanFreqInfo}
+                />
+                <InfoDisplayCase 
+                    key={5}
+                    icon={HEATINGCOIL}
+                    info={heatingCoilInfo}
+                />
+                <InfoDisplayCase 
+                    key={6}
+                    icon={CO2}
+                    info={co2Info}
+                />
             </div>
         </div>
     )

@@ -9,20 +9,23 @@ import './InfoDisplayCase.css';
 function InfoDisplayCase({icon, info = []}){
     return (
         <div className="info-display-case">
-            {/* <img 
+            <img 
                 src={icon}
                 alt='case-icon'
-            /> */}
-            {info.map((detail, index) => {
-                return(
-                    <div className="detail"
-                         key={index + 1000}
-                    >
-                        <label>{detail?.title}</label>
-                        <p>{detail?.value} {}</p>
-                    </div>
-                )
-            })}
+                style={{height: 40, width:40}}
+            />
+            <div className="detail-container">
+                {info.map((detail, index) => {
+                    return(
+                        <div className="detail"
+                            key={index + 1000}
+                        >
+                            <label>{detail?.title}: </label>
+                            <p>{detail?.value} {}</p>
+                        </div>
+                    )
+                })}
+            </div>
         </div>
     )
 }

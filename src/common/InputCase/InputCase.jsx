@@ -22,12 +22,13 @@ function InputCase({title, field, value, onSubmit}){
 
     return(
         <div className="input-case">
-            <label>{title}</label>
+            <label><b>{title}</b></label>
             <input 
                 type='number'
                 value={inputValue}
                 onChange={(e) => handleValueChange(e.target.value)}
                 onBlur={handleBlur}
+                className='transparent-input'
             />
         </div>
     )
